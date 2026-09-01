@@ -1,11 +1,16 @@
+import { toNodeHandler } from "better-auth/node";
 import express from "express";
 import { pinoHttp } from "pino-http";
 import { env } from "@/shared/config/env.js";
 import { logger } from "@/shared/logger/logger.js";
+import { auth } from "./contexts/identity/infrastructure/auth/auth.config.js";
+import { registerTeacherHandler } from "./contexts/identity/infrastructure/routes/register-teacher.route.js";
 
 const app = express();
 
 app.use(pinoHttp({ logger, genReqId: () => crypto.randomUUID() }));
+
+app.all("/api/auth/*splat", toNodeHandler(auth));
 
 app.use(express.json());
 
@@ -13,9 +18,7 @@ app.get("/health", (_req, res) => {
 	res.json({ status: "ok" });
 });
 
-app.get("/ping", (_req, res) => {
-	res.json({ response: "pong" });
-});
+app.post("/teachers/register", registerTeacherHandler);
 
 app.listen(env.PORT, () => {
 	logger.info(`API listening on http://localhost:${env.PORT}`);
