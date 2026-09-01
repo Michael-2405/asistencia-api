@@ -1,0 +1,100 @@
+{
+	"$schema": "https://biomejs.dev/schemas/latest/schema.json",
+
+	"formatter": {
+		"enabled": true,
+		"formatWithErrors": false,
+		"indentStyle": "tab",
+		"indentWidth": 2,
+		"lineEnding": "lf",
+		"lineWidth": 100,
+		"attributePosition": "auto"
+	},
+
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"preset": "recommended",
+
+			"correctness": {
+				"noUnusedVariables": "error",
+				"noUnusedImports": "error",
+				"noUnreachable": "error",
+				"noUnusedFunctionParameters": "warn"
+			},
+
+			"suspicious": {
+				"noExplicitAny": "error",
+				"noArrayIndexKey": "warn",
+				"noAssignInExpressions": "error",
+				"noDoubleEquals": "error",
+				"noShadowRestrictedNames": "error"
+			},
+
+			"style": {
+				"noNegationElse": "error",
+				"useImportType": "error",
+				"useAsConstAssertion": "error"
+			}
+		}
+	},
+
+	"overrides": [
+		{
+			"includes": [
+				"**/*.d.ts",
+				"drizzle/**",
+				"src/contexts/identity/infrastructure/db/auth.schema.ts"
+			],
+			"linter": {
+				"rules": {
+					"correctness": {
+						"noUnusedVariables": "off"
+					}
+				}
+			}
+		},
+		{
+			"includes": ["drizzle/**", "src/contexts/identity/infrastructure/db/auth.schema.ts"],
+			"formatter": { "enabled": false },
+			"linter": { "enabled": false },
+			"assist": { "enabled": false }
+		}
+	],
+
+	"css": {
+		"parser": {
+			"cssModules": false,
+			"tailwindDirectives": true
+		}
+	},
+
+	"javascript": {
+		"formatter": {
+			"quoteStyle": "double",
+			"jsxQuoteStyle": "double",
+			"trailingCommas": "all",
+			"semicolons": "always",
+			"arrowParentheses": "always",
+			"bracketSpacing": true
+		}
+	},
+
+	"vcs": {
+		"enabled": true,
+		"clientKind": "git",
+		"useIgnoreFile": true
+	},
+	"files": {
+		"ignoreUnknown": false
+	},
+
+	"assist": {
+		"enabled": true,
+		"actions": {
+			"source": {
+				"organizeImports": "on"
+			}
+		}
+	}
+}
