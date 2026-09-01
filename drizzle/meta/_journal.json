@@ -15,6 +15,13 @@
       "when": 1788277841152,
       "tag": "0001_elite_galactus",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1788291905753,
+      "tag": "0002_orange_starbolt",
+      "breakpoints": true
     }
   ]
 }
