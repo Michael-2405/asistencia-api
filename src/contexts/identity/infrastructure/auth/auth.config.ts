@@ -11,6 +11,7 @@ import * as authSchema from "../db/auth.schema.js";
 
 export const auth = betterAuth({
 	baseURL: env.BETTER_AUTH_URL,
+	trustedOrigins: [env.CORS_ORIGIN],
 	database: drizzleAdapter(db, {
 		provider: "pg",
 		schemaName: "auth",

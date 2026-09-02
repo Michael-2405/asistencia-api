@@ -1,8 +1,8 @@
-// src/contexts/identity/application/register-teacher.use-case.ts
 import { eq } from "drizzle-orm";
 import { auth } from "@/contexts/identity/infrastructure/auth/auth.config.js";
 import { user } from "@/contexts/identity/infrastructure/db/auth.schema.js";
 import { teacherProfiles } from "@/contexts/identity/infrastructure/db/schema.js";
+import { env } from "@/shared/config/env.js";
 import { db } from "@/shared/db/client.js";
 import { ConflictError } from "@/shared/errors/app-error.js";
 import type { RegisterTeacherInput } from "./register-teacher.schema.js";
@@ -18,7 +18,12 @@ export async function registerTeacher(input: RegisterTeacherInput) {
 	}
 
 	const signUpResult = await auth.api.signUpEmail({
-		body: { email: input.email, password: input.password, name: input.fullName },
+		body: {
+			email: input.email,
+			password: input.password,
+			name: input.fullName,
+			callbackURL: `${env.CORS_ORIGIN}/login`,
+		},
 	});
 
 	if (!signUpResult?.user) {
