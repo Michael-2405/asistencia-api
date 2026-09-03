@@ -1,4 +1,4 @@
-import { and, count, eq, type SQL } from "drizzle-orm";
+import { and, eq, type SQL, sql } from "drizzle-orm";
 import { db } from "@/shared/db/client.js";
 import { courses, students, subjects } from "../infrastructure/db/schema.js";
 
@@ -17,10 +17,15 @@ export async function listCourses(userId: string, schoolYearId?: string) {
 			subjectId: courses.subjectId,
 			subjectName: subjects.name,
 			active: courses.active,
-			activeStudentCount: count(students.id),
+			activeStudentCount: sql<number>`count(*) filter (where ${students.active} = true)`.mapWith(
+				Number,
+			),
+			inactiveStudentCount: sql<number>`count(*) filter (where ${students.active} = false)`.mapWith(
+				Number,
+			),
 		})
 		.from(courses)
-		.leftJoin(students, and(eq(students.courseId, courses.id), eq(students.active, true)))
+		.leftJoin(students, eq(students.courseId, courses.id))
 		.leftJoin(subjects, eq(courses.subjectId, subjects.id))
 		.where(and(...conditions))
 		.groupBy(courses.id, subjects.name);

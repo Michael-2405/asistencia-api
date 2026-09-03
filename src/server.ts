@@ -5,6 +5,7 @@ import helmet from "helmet";
 import { pinoHttp } from "pino-http";
 import { registerTeacherSchema } from "@/contexts/identity/application/register-teacher.schema.js";
 import { auth } from "@/contexts/identity/infrastructure/auth/auth.config.js";
+import { meRouter } from "@/contexts/identity/infrastructure/routes/me.routes.js";
 import { registerTeacherHandler } from "@/contexts/identity/infrastructure/routes/register-teacher.route.js";
 import { env } from "@/shared/config/env.js";
 import { logger } from "@/shared/logger/logger.js";
@@ -21,9 +22,7 @@ const app = express();
 
 app.use(helmet());
 app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }));
-
 app.use(generalRateLimit);
-
 app.use(pinoHttp({ logger, genReqId: () => crypto.randomUUID() }));
 
 app.all("/api/auth/*splat", toNodeHandler(auth));
@@ -34,13 +33,14 @@ app.get("/health", (_req, res) => {
 	res.json({ status: "ok" });
 });
 
-app.use(academicRouter);
 app.post(
 	"/teachers/register",
 	registrationRateLimit,
 	validate(registerTeacherSchema),
 	registerTeacherHandler,
 );
+app.use(meRouter);
+app.use(academicRouter);
 
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);

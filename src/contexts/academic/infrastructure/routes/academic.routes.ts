@@ -3,6 +3,7 @@ import type { Request, Response } from "express";
 import { Router } from "express";
 import { db } from "../../../../shared/db/client.js";
 import { respondSuccess } from "../../../../shared/http/respond.js";
+import { checkNotSuspended } from "../../../../shared/middleware/check-not-suspended.middleware.js";
 import { requireAuth } from "../../../../shared/middleware/require-auth.middleware.js";
 import { validate } from "../../../../shared/middleware/validate.middleware.js";
 import { addStudentSchema } from "../../application/add-student.schema.js";
@@ -13,6 +14,7 @@ import { createCourseSchema } from "../../application/create-course.schema.js";
 import { createCourse } from "../../application/create-course.use-case.js";
 import { createSchoolYearSchema } from "../../application/create-school-year.schema.js";
 import { createSchoolYear } from "../../application/create-school-year.use-case.js";
+import { deleteCourse } from "../../application/delete-course.use-case.js";
 import { listCourses } from "../../application/list-courses.use-case.js";
 import { listStudents } from "../../application/list-students.use-case.js";
 import { updateCourse } from "../../application/update-course.use-case.js";
@@ -33,6 +35,7 @@ academicRouter.get("/school-years", async (_req, res) => {
 });
 
 academicRouter.use(requireAuth);
+academicRouter.use(checkNotSuspended);
 
 academicRouter.post("/school-years", validate(createSchoolYearSchema), async (req, res) => {
 	const schoolYear = await createSchoolYear(req.body);
@@ -101,5 +104,13 @@ academicRouter.patch(
 	async (req: Request<{ courseId: string; studentId: string }>, res: Response) => {
 		const student = await withdrawStudent(req.userId, req.params.courseId, req.params.studentId);
 		respondSuccess(res, student);
+	},
+);
+
+academicRouter.delete(
+	"/courses/:courseId",
+	async (req: Request<{ courseId: string }>, res: Response) => {
+		const course = await deleteCourse(req.userId, req.params.courseId);
+		respondSuccess(res, course);
 	},
 );

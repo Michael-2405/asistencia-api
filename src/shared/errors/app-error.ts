@@ -34,3 +34,8 @@ export class ConflictError extends AppError {
 	readonly statusCode = 409;
 	readonly code = "CONFLICT";
 }
+
+export class AccountSuspendedError extends AppError {
+	readonly statusCode = 403;
+	readonly code = "ACCOUNT_SUSPENDED";
+}

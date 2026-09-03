@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { boolean, pgSchema, text, uuid, varchar } from "drizzle-orm/pg-core";
+import { boolean, pgSchema, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 import { user } from "./auth.schema.js";
 
 export const identitySchema = pgSchema("identity");
@@ -13,6 +13,8 @@ export const teacherProfiles = identitySchema.table("teacher_profiles", {
 	educationLevel: varchar("education_level", { length: 20 }).notNull(),
 	isHomeroomTeacher: boolean("is_homeroom_teacher").notNull().default(false),
 	subjectId: uuid("subject_id"),
+	suspendedAt: timestamp("suspended_at"),
+	scheduledDeletionAt: timestamp("scheduled_deletion_at"),
 });
 
 export const teacherProfileRelations = relations(teacherProfiles, ({ one }) => ({
