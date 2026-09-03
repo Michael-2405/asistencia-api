@@ -11,11 +11,19 @@ import { logger } from "@/shared/logger/logger.js";
 import { errorHandlerMiddleware } from "@/shared/middleware/error-handler.middleware.js";
 import { notFoundMiddleware } from "@/shared/middleware/not-found.middleware.js";
 import { validate } from "@/shared/middleware/validate.middleware.js";
+import { academicRouter } from "./contexts/academic/infrastructure/routes/academic.routes.js";
+import {
+	generalRateLimit,
+	registrationRateLimit,
+} from "./shared/middleware/rate-limit.middleware.js";
 
 const app = express();
 
 app.use(helmet());
 app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }));
+
+app.use(generalRateLimit);
+
 app.use(pinoHttp({ logger, genReqId: () => crypto.randomUUID() }));
 
 app.all("/api/auth/*splat", toNodeHandler(auth));
@@ -26,7 +34,13 @@ app.get("/health", (_req, res) => {
 	res.json({ status: "ok" });
 });
 
-app.post("/teachers/register", validate(registerTeacherSchema), registerTeacherHandler);
+app.use(academicRouter);
+app.post(
+	"/teachers/register",
+	registrationRateLimit,
+	validate(registerTeacherSchema),
+	registerTeacherHandler,
+);
 
 app.use(notFoundMiddleware);
 app.use(errorHandlerMiddleware);
