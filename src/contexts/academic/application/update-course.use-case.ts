@@ -1,9 +1,9 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/shared/db/client.js";
 import { ConflictError } from "../../../shared/errors/app-error.js";
+import type { CreateCourseInput } from "../domain/create-course.schema.js";
 import { courses } from "../infrastructure/db/schema.js";
-import { assertCourseOwnership } from "./assert-course-ownership.js";
-import type { CreateCourseInput } from "./create-course.schema.js";
+import { assertCourseOwnership } from "../utils/assert-course-ownership.js";
 
 export async function updateCourse(userId: string, courseId: string, input: CreateCourseInput) {
 	await assertCourseOwnership(courseId, userId);

@@ -1,9 +1,9 @@
 import { and, eq } from "drizzle-orm";
 import { db } from "../../../shared/db/client.js";
 import { NotFoundError } from "../../../shared/errors/app-error.js";
+import type { AddStudentInput } from "../domain/add-student.schema.js";
 import { students } from "../infrastructure/db/schema.js";
-import type { AddStudentInput } from "./add-student.schema.js";
-import { assertCourseOwnership } from "./assert-course-ownership.js";
+import { assertCourseOwnership } from "../utils/assert-course-ownership.js";
 
 export async function updateStudent(
 	userId: string,

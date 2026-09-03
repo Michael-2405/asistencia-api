@@ -1,8 +1,8 @@
 import { and, gte, lte } from "drizzle-orm";
 import { db } from "@/shared/db/client.js";
 import { ConflictError } from "@/shared/errors/app-error.js";
+import type { CreateSchoolYearInput } from "../domain/create-school-year.schema.js";
 import { schoolYears } from "../infrastructure/db/schema.js";
-import type { CreateSchoolYearInput } from "./create-school-year.schema.js";
 
 export async function createSchoolYear(input: CreateSchoolYearInput) {
 	const overlapping = await db

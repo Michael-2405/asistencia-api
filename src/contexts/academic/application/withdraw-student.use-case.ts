@@ -2,7 +2,7 @@ import { and, eq } from "drizzle-orm";
 import { db } from "../../../shared/db/client.js";
 import { NotFoundError } from "../../../shared/errors/app-error.js";
 import { students } from "../infrastructure/db/schema.js";
-import { assertCourseOwnership } from "./assert-course-ownership.js";
+import { assertCourseOwnership } from "../utils/assert-course-ownership.js";
 
 export async function withdrawStudent(userId: string, courseId: string, studentId: string) {
 	await assertCourseOwnership(courseId, userId);

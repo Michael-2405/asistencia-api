@@ -5,7 +5,7 @@ import { teacherProfiles } from "@/contexts/identity/infrastructure/db/schema.js
 import { env } from "@/shared/config/env.js";
 import { db } from "@/shared/db/client.js";
 import { ConflictError } from "@/shared/errors/app-error.js";
-import type { RegisterTeacherInput } from "./register-teacher.schema.js";
+import type { RegisterTeacherInput } from "../domain/register-teacher.schema.js";
 
 export async function registerTeacher(input: RegisterTeacherInput) {
 	const [existingUser] = await db

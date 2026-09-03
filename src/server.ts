@@ -3,7 +3,7 @@ import cors from "cors";
 import express from "express";
 import helmet from "helmet";
 import { pinoHttp } from "pino-http";
-import { registerTeacherSchema } from "@/contexts/identity/application/register-teacher.schema.js";
+import { registerTeacherSchema } from "@/contexts/identity/domain/register-teacher.schema.js";
 import { auth } from "@/contexts/identity/infrastructure/auth/auth.config.js";
 import { meRouter } from "@/contexts/identity/infrastructure/routes/me.routes.js";
 import { registerTeacherHandler } from "@/contexts/identity/infrastructure/routes/register-teacher.route.js";

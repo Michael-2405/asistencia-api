@@ -1,8 +1,8 @@
 import { db } from "@/shared/db/client.js";
 import { ConflictError } from "../../../shared/errors/app-error.js";
+import type { CreateCourseInput } from "../domain/create-course.schema.js";
 import { courses } from "../infrastructure/db/schema.js";
-import type { CreateCourseInput } from "./create-course.schema.js";
-import { getCurrentSchoolYear } from "./get-current-school-year.js";
+import { getCurrentSchoolYear } from "../utils/get-current-school-year.js";
 
 export async function createCourse(userId: string, input: CreateCourseInput) {
 	const schoolYear = await getCurrentSchoolYear();
