@@ -1,8 +1,8 @@
 import { and, eq, inArray } from "drizzle-orm";
 import { db } from "@/shared/db/client.js";
+import type { CloneCoursesInput } from "../domain/clone-courses.schema.js";
 import { courses } from "../infrastructure/db/schema.js";
-import type { CloneCoursesInput } from "./clone-courses.schema.js";
-import { getCurrentSchoolYear } from "./get-current-school-year.js";
+import { getCurrentSchoolYear } from "../utils/get-current-school-year.js";
 
 export async function cloneCourses(userId: string, input: CloneCoursesInput) {
 	const targetSchoolYear = await getCurrentSchoolYear();

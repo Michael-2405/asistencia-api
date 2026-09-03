@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/shared/db/client.js";
 import { courses } from "../infrastructure/db/schema.js";
-import { assertCourseOwnership } from "./assert-course-ownership.js";
+import { assertCourseOwnership } from "../utils/assert-course-ownership.js";
 
 export async function deleteCourse(userId: string, courseId: string) {
 	await assertCourseOwnership(courseId, userId);
