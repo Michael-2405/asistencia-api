@@ -3,7 +3,7 @@ import { db } from "@/shared/db/client.js";
 import { courses, students, subjects } from "../infrastructure/db/schema.js";
 
 export async function listCourses(userId: string, schoolYearId?: string) {
-	const conditions: SQL[] = [eq(courses.userId, userId)];
+	const conditions: SQL[] = [eq(courses.userId, userId), eq(courses.active, true)];
 	if (schoolYearId) conditions.push(eq(courses.schoolYearId, schoolYearId));
 
 	return db
