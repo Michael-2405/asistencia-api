@@ -1,13 +1,13 @@
-# Asistencia API
+# Cuaderno Digital — API
 
-Backend del sistema de control de asistencia y puntualidad para docentes de escuelas públicas dominicanas (MINERD). Reemplaza el registro físico en papel, con aislamiento total de datos por docente.
+Backend del sistema de control de asistencia y calificaciones para docentes. Multi-tenant: cada docente gestiona sus propios cursos, estudiantes y calendario, sin visibilidad sobre los de otros docentes.
 
 ## Stack técnico
 
 - **Node.js** + **TypeScript**
 - **Express** como framework HTTP
 - **Drizzle ORM** sobre PostgreSQL, con schemas separados por bounded context (`auth`, `identity`, `academic`, `attendance`)
-- **Better Auth** para autenticación (email/contraseña, sesiones, verificación de correo)
+- **Better Auth** para autenticación (email/contraseña, verificación de correo, 2FA, gestión de sesiones)
 - **Zod** para validación de entrada
 - **Pino** (+ `pino-http`, `pino-pretty` en desarrollo) para logging estructurado
 - **Biome** como linter y formatter
@@ -16,8 +16,7 @@ Backend del sistema de control de asistencia y puntualidad para docentes de escu
 
 ## Arquitectura
 
-El código sigue un enfoque hexagonal / DDD-lite, organizado por **contextos delimitados** (bounded contexts), cada uno con su propio schema de PostgreSQL:
-
+Hexagonal / DDD-lite, organizado por **contextos delimitados** (bounded contexts), cada uno con su propio schema de PostgreSQL:
 ```
 src/
 contexts/
@@ -30,14 +29,13 @@ db/ # Cliente de Drizzle
 logger/ # Configuración de Pino
 ```
 
-
 Cada contexto sigue el mismo patrón interno: `domain/` (reglas de negocio), `application/` (casos de uso, validación con Zod), `infrastructure/` (schema de base de datos, rutas HTTP, adaptadores externos).
 
 ## Requisitos previos
 
 - Node.js 20+
 - Docker (para PostgreSQL local)
-- Un [Personal Access Token](https://github.com/settings/tokens) no es necesario aquí — pero sí necesitas `pre-commit` instalado (`pipx install pre-commit`) y [Gitleaks](https://github.com/gitleaks/gitleaks) en tu PATH
+- `pre-commit` instalado (`pipx install pre-commit`) y [Gitleaks](https://github.com/gitleaks/gitleaks) en tu PATH
 
 ## Configuración
 
@@ -65,7 +63,7 @@ docker compose up -d
 npm run db:migrate
 ```
 
-5. Siembra los catálogos y el calendario oficial (materias, estados de asistencia, razones de excusa, año escolar 2026-2027):
+5. Siembra los catálogos y el calendario oficial:
 
 ```bash
 npm run seed
@@ -103,6 +101,11 @@ npm run dev
 
 `main` (producción) ← `develop` (integración) ← `feature/*` / `fix/*`. Cambios vía Pull Request, con CI y escaneo de secretos obligatorios antes de mergear.
 
+## Documentación adicional
+
+- `CONTEXT.md` — arquitectura completa, modelo de dominio, gotchas conocidos.
+- `TECH_DEBT.md` — deuda técnica y funcionalidad pendiente, priorizada.
+
 ## Estado del proyecto
 
-En desarrollo activo. Alcance del MVP actual: autenticación de docentes, gestión de cursos y estudiantes, calendario académico, y registro básico de asistencia. Diferido explícitamente: resúmenes calculados, sistema de alertas, flujos específicos de secundaria (evaluaciones completivas/extraordinarias), 2FA.
+En desarrollo activo. Módulos completos: autenticación, gestión de cursos y estudiantes, calendario académico, registro de asistencia. Próximo bloque: gestión de calificaciones.

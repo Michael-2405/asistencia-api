@@ -14,21 +14,17 @@ export const meRouter = Router();
 
 meRouter.use(requireAuth);
 
-meRouter.get("/teachers/me", async (req, res) => {
+meRouter.get("/me", async (req, res) => {
 	const profile = await getMyProfile(req.userId);
 	respondSuccess(res, profile);
 });
 
-meRouter.post(
-	"/teachers/me/suspend",
-	validate(suspendSchema),
-	async (req: Request, res: Response) => {
-		const result = await suspendAccount(req.userId, req.body.password, req.headers);
-		respondSuccess(res, result);
-	},
-);
+meRouter.post("/me/suspend", validate(suspendSchema), async (req: Request, res: Response) => {
+	const result = await suspendAccount(req.userId, req.body.password, req.headers);
+	respondSuccess(res, result);
+});
 
-meRouter.post("/teachers/me/reactivate", async (req, res) => {
+meRouter.post("/me/reactivate", async (req, res) => {
 	const result = await reactivateAccount(req.userId);
 	respondSuccess(res, result);
 });

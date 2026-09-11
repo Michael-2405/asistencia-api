@@ -5,6 +5,7 @@ import { checkNotSuspended } from "@/shared/middleware/check-not-suspended.middl
 import { requireAuth } from "@/shared/middleware/require-auth.middleware.js";
 import { validate } from "@/shared/middleware/validate.middleware.js";
 import { getMonthlyAttendance } from "../../application/get-monthly-attendance.use-case.js";
+import { getTodayAttendanceStatus } from "../../application/get-today-attendance-status.use-case.js";
 import { markCourseNonInstructionalDay } from "../../application/mark-course-non-instructional-day.use-case.js";
 import { saveDailyAttendance } from "../../application/save-daily-attendance.use-case.js";
 import { markCourseNonInstructionalDaySchema } from "../../domain/mark-course-non-instructional-day.schema.js";
@@ -24,6 +25,11 @@ attendanceRouter.get(
 		respondSuccess(res, result);
 	},
 );
+
+attendanceRouter.get("/courses/attendance-status", async (req, res) => {
+	const result = await getTodayAttendanceStatus(req.userId);
+	respondSuccess(res, result);
+});
 
 attendanceRouter.post(
 	"/courses/:courseId/attendance/day",
