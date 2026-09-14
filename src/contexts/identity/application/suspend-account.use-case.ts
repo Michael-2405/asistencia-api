@@ -1,11 +1,9 @@
 import type { IncomingHttpHeaders } from "node:http";
 import { fromNodeHeaders } from "better-auth/node";
-import { eq } from "drizzle-orm";
-import { db } from "@/shared/db/client.js";
-import { ConflictError, ValidationError } from "@/shared/errors/app-error.js";
+import { ConflictError } from "@/shared/errors/app-error.js";
 import { auth } from "../infrastructure/auth/auth.config.js";
-import { user } from "../infrastructure/db/auth.schema.js";
-import { teacherProfiles } from "../infrastructure/db/schema.js";
+import * as teacherProfileRepository from "../infrastructure/db/teacher-profile.repository.js";
+import { verifyPassword } from "./verify-password.js";
 
 const GRACE_PERIOD_DAYS = 30;
 
@@ -14,29 +12,21 @@ export async function suspendAccount(
 	password: string,
 	headers: IncomingHttpHeaders,
 ) {
-	const [row] = await db
-		.select({ email: user.email, suspendedAt: teacherProfiles.suspendedAt })
-		.from(teacherProfiles)
-		.innerJoin(user, eq(user.id, teacherProfiles.userId))
-		.where(eq(teacherProfiles.userId, userId));
+	const profile = await teacherProfileRepository.findByUserId(userId);
 
-	if (row?.suspendedAt) {
+	if (profile?.suspendedAt) {
 		throw new ConflictError("Tu cuenta ya está suspendida");
 	}
 
-	try {
-		await auth.api.signInEmail({ body: { email: row.email, password } });
-	} catch {
-		throw new ValidationError("Contraseña incorrecta");
-	}
+	await verifyPassword(password, headers);
 
 	const scheduledDeletionAt = new Date();
 	scheduledDeletionAt.setDate(scheduledDeletionAt.getDate() + GRACE_PERIOD_DAYS);
 
-	await db
-		.update(teacherProfiles)
-		.set({ suspendedAt: new Date(), scheduledDeletionAt })
-		.where(eq(teacherProfiles.userId, userId));
+	await teacherProfileRepository.updateSuspension(userId, {
+		suspendedAt: new Date(),
+		scheduledDeletionAt,
+	});
 
 	await auth.api.revokeSessions({ headers: fromNodeHeaders(headers) });
 

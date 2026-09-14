@@ -1,16 +1,9 @@
-import { and, gte, lte } from "drizzle-orm";
-import { db } from "@/shared/db/client.js";
 import { ConflictError } from "@/shared/errors/app-error.js";
 import type { CreateSchoolYearInput } from "../domain/create-school-year.schema.js";
-import { schoolYears } from "../infrastructure/db/schema.js";
+import * as schoolYearsRepository from "../infrastructure/db/school-years.repository.js";
 
 export async function createSchoolYear(input: CreateSchoolYearInput) {
-	const overlapping = await db
-		.select({ id: schoolYears.id, name: schoolYears.name })
-		.from(schoolYears)
-		.where(
-			and(lte(schoolYears.startDate, input.endDate), gte(schoolYears.endDate, input.startDate)),
-		);
+	const overlapping = await schoolYearsRepository.findOverlapping(input.startDate, input.endDate);
 
 	if (overlapping.length > 0) {
 		throw new ConflictError(
@@ -19,7 +12,7 @@ export async function createSchoolYear(input: CreateSchoolYearInput) {
 	}
 
 	try {
-		const [schoolYear] = await db.insert(schoolYears).values(input).returning();
+		const schoolYear = await schoolYearsRepository.insert(input);
 		return schoolYear;
 	} catch (error) {
 		if (isPgUniqueViolation(error)) {

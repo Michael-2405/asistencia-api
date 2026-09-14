@@ -1,7 +1,5 @@
-import { desc, eq } from "drizzle-orm";
-import { db } from "@/shared/db/client.js";
 import type { AddStudentInput } from "../domain/add-student.schema.js";
-import { students } from "../infrastructure/db/schema.js";
+import * as studentsRepository from "../infrastructure/db/students.repository.js";
 import { assertCourseOwnership } from "../utils/assert-course-ownership.js";
 
 const MAX_RETRIES = 3;
@@ -10,29 +8,20 @@ export async function addStudent(userId: string, courseId: string, input: AddStu
 	await assertCourseOwnership(courseId, userId);
 
 	for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-		const [lastStudent] = await db
-			.select({ orderNumber: students.orderNumber })
-			.from(students)
-			.where(eq(students.courseId, courseId))
-			.orderBy(desc(students.orderNumber))
-			.limit(1);
-
-		const nextOrderNumber = (lastStudent?.orderNumber ?? 0) + 1;
+		const lastOrderNumber = await studentsRepository.findLastOrderNumber(courseId);
+		const nextOrderNumber = (lastOrderNumber ?? 0) + 1;
 
 		try {
-			const [student] = await db
-				.insert(students)
-				.values({
-					courseId,
-					orderNumber: nextOrderNumber,
-					firstName: input.firstName,
-					secondName: input.secondName,
-					firstLastname: input.firstLastname,
-					secondLastname: input.secondLastname,
-					birthDate: input.birthDate,
-					sex: input.sex,
-				})
-				.returning();
+			const student = await studentsRepository.insert({
+				courseId,
+				orderNumber: nextOrderNumber,
+				firstName: input.firstName,
+				secondName: input.secondName,
+				firstLastname: input.firstLastname,
+				secondLastname: input.secondLastname,
+				birthDate: input.birthDate,
+				sex: input.sex,
+			});
 
 			return student;
 		} catch (error) {

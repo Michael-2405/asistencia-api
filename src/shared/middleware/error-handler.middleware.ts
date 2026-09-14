@@ -16,6 +16,7 @@ export function errorHandlerMiddleware(
 				code: err.code,
 				message: err.message,
 				...(err.details ? { details: err.details } : {}),
+				requestId: String(req.id),
 			},
 		};
 		return res.status(err.statusCode).json(body);
@@ -24,7 +25,11 @@ export function errorHandlerMiddleware(
 	req.log.error({ err }, "Unhandled error");
 	const body: ApiErrorResponse = {
 		status: "error",
-		error: { code: "INTERNAL_ERROR", message: "Ocurrió un error inesperado" },
+		error: {
+			code: "INTERNAL_ERROR",
+			message: "Ocurrió un error inesperado",
+			requestId: String(req.id),
+		},
 	};
 	res.status(500).json(body);
 }

@@ -1,22 +1,25 @@
-import { eq } from "drizzle-orm";
-import { db } from "@/shared/db/client.js";
+import type { IncomingHttpHeaders } from "node:http";
 import { ValidationError } from "@/shared/errors/app-error.js";
-import { teacherProfiles } from "../infrastructure/db/schema.js";
+import * as teacherProfileRepository from "../infrastructure/db/teacher-profile.repository.js";
+import { verifyPassword } from "./verify-password.js";
 
-export async function reactivateAccount(userId: string) {
-	const [profile] = await db
-		.select()
-		.from(teacherProfiles)
-		.where(eq(teacherProfiles.userId, userId));
+export async function reactivateAccount(
+	userId: string,
+	password: string,
+	headers: IncomingHttpHeaders,
+) {
+	const profile = await teacherProfileRepository.findByUserId(userId);
 
 	if (!profile?.suspendedAt) {
 		throw new ValidationError("Tu cuenta no está suspendida");
 	}
 
-	await db
-		.update(teacherProfiles)
-		.set({ suspendedAt: null, scheduledDeletionAt: null })
-		.where(eq(teacherProfiles.userId, userId));
+	await verifyPassword(password, headers);
+
+	await teacherProfileRepository.updateSuspension(userId, {
+		suspendedAt: null,
+		scheduledDeletionAt: null,
+	});
 
 	return { reactivated: true };
 }

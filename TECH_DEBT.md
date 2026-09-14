@@ -20,6 +20,10 @@ Sin cambios desde la revisión anterior: `POST /school-years` sin control de rol
 
 Sin cambios desde la revisión anterior: `event_type` sin lógica de `COMPLETIVE`/`EXTRAORDINARY`, día ADP simplificado, sin FK entre `teacher_profiles.subjectId` y `academic.subjects`, `updateCourse`/`updateStudent` como reemplazo completo, `withdrawStudent` siempre con fecha de hoy, sistema de alertas y resumen anual sin backend.
 
+## 🟣 Deuda de arquitectura (introducida por el refactor de capas)
+
+- **`attendance` escribe directo en `academic.course_non_instructional_days`** (`attendance/infrastructure/db/course-non-instructional-days.repository.ts`): la tabla vive en el schema de `academic`, pero el caso de uso (marcar día no laborable de un curso) es una feature de `attendance`, igual que ya ocurría antes del refactor. Se mantuvo así deliberadamente — moverla a `academic` habría requerido una llamada cruzada de servicio a repositorio entre contextos, algo que no existe en ningún otro punto del código. Revisar si `academic` alguna vez necesita imponer sus propias reglas de negocio sobre esta tabla (hoy no las tiene); si eso pasa, es la señal para migrar la escritura al lado de `academic`.
+
 ## 🔵 Infraestructura / operación
 
 Sin cambios desde la revisión anterior: Resend en modo sandbox, sin tests, CI sin Postgres, sin observabilidad, Terraform solo gestiona GitHub, sin imagen Docker de la API, credenciales de desarrollo local.
