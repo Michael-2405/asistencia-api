@@ -1,10 +1,7 @@
-import { and, eq, inArray } from "drizzle-orm";
-import { students } from "@/contexts/academic/infrastructure/db/schema.js";
 import { assertCourseOwnership } from "@/contexts/academic/utils/assert-course-ownership.js";
-import { db } from "@/shared/db/client.js";
 import { ConflictError, ValidationError } from "@/shared/errors/app-error.js";
 import type { SaveDailyAttendanceInput } from "../domain/save-daily-attendance.schema.js";
-import { attendanceRecords } from "../infrastructure/db/schema.js";
+import * as attendanceRecordsRepository from "../infrastructure/db/attendance-records.repository.js";
 
 function todayIso(): string {
 	return new Date().toISOString().split("T")[0];
@@ -23,10 +20,10 @@ export async function saveDailyAttendance(
 
 	const studentIds = input.records.map((r) => r.studentId);
 
-	const studentRows = await db
-		.select({ id: students.id, active: students.active, withdrawalDate: students.withdrawalDate })
-		.from(students)
-		.where(and(eq(students.courseId, courseId), inArray(students.id, studentIds)));
+	const studentRows = await attendanceRecordsRepository.findStudentsEligibility(
+		courseId,
+		studentIds,
+	);
 
 	const withdrawnIneligible = studentRows.filter((s) => {
 		if (s.active) return false;
@@ -40,18 +37,17 @@ export async function saveDailyAttendance(
 		);
 	}
 
-	const existing = await db
-		.select({ id: attendanceRecords.id })
-		.from(attendanceRecords)
-		.where(and(eq(attendanceRecords.courseId, courseId), eq(attendanceRecords.date, input.date)))
-		.limit(1);
+	const existing = await attendanceRecordsRepository.findExistingForCourseAndDate(
+		courseId,
+		input.date,
+	);
 
 	if (existing.length > 0) {
 		throw new ConflictError("La asistencia de este día ya fue registrada");
 	}
 
 	try {
-		await db.insert(attendanceRecords).values(
+		await attendanceRecordsRepository.insertMany(
 			input.records.map((r) => ({
 				studentId: r.studentId,
 				courseId,

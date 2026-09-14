@@ -1,16 +1,11 @@
-import { eq } from "drizzle-orm";
-import { db } from "@/shared/db/client.js";
 import { ValidationError } from "@/shared/errors/app-error.js";
-import { subjects } from "../infrastructure/db/schema.js";
+import * as subjectsRepository from "../infrastructure/db/subjects.repository.js";
 
 export async function assertSubjectMatchesLevel(
 	subjectId: string,
 	educationLevel: "PRIMARY" | "SECONDARY",
 ) {
-	const [subject] = await db
-		.select({ level: subjects.level })
-		.from(subjects)
-		.where(eq(subjects.id, subjectId));
+	const subject = await subjectsRepository.findById(subjectId);
 
 	if (!subject) {
 		throw new ValidationError("La materia seleccionada no existe");

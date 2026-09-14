@@ -1,40 +1,18 @@
-import { sql } from "drizzle-orm";
 import { assertCourseOwnership } from "@/contexts/academic/utils/assert-course-ownership.js";
-import { db } from "@/shared/db/client.js";
+import * as attendanceCalendarRepository from "../infrastructure/db/attendance-calendar.repository.js";
 
 export async function getAnnualAttendanceSummary(userId: string, courseId: string) {
 	const course = await assertCourseOwnership(courseId, userId);
 
-	const [schoolYear] = (
-		await db.execute(
-			sql`SELECT start_date::text, end_date::text FROM academic.school_years WHERE id = ${course.schoolYearId}`,
-		)
-	).rows;
+	const schoolYear = await attendanceCalendarRepository.findSchoolYearDateRange(
+		course.schoolYearId,
+	);
 
-	const result = await db.execute(sql`
-		WITH months AS (
-			SELECT date_trunc('month', gs)::date AS month_start
-			FROM generate_series(${schoolYear.start_date}::date, ${schoolYear.end_date}::date, interval '1 month') AS gs
-		),
-		roster AS (
-			SELECT id, order_number, first_name, second_name, first_lastname, second_lastname, active
-			FROM academic.students WHERE course_id = ${courseId}
-		)
-		SELECT
-			r.id AS student_id, r.order_number, r.first_name, r.second_name, r.first_lastname, r.second_lastname, r.active,
-			m.month_start::text AS month,
-			COUNT(*) FILTER (WHERE a.status_code = 'P') AS p,
-			COUNT(*) FILTER (WHERE a.status_code = 'T') AS t,
-			COUNT(*) FILTER (WHERE a.status_code = 'A') AS a,
-			COUNT(*) FILTER (WHERE a.status_code = 'E') AS e
-		FROM roster r
-		CROSS JOIN months m
-		LEFT JOIN attendance.attendance_records a
-			ON a.student_id = r.id AND a.course_id = ${courseId} AND a.event_type = 'REGULAR'
-			AND date_trunc('month', a.date) = m.month_start
-		GROUP BY r.id, r.order_number, r.first_name, r.second_name, r.first_lastname, r.second_lastname, r.active, m.month_start
-		ORDER BY r.order_number, m.month_start
-	`);
+	const rows = await attendanceCalendarRepository.findAnnualSummaryRows(
+		courseId,
+		schoolYear.start_date as string,
+		schoolYear.end_date as string,
+	);
 
 	const byStudent = new Map<
 		string,
@@ -47,7 +25,7 @@ export async function getAnnualAttendanceSummary(userId: string, courseId: strin
 		}
 	>();
 
-	for (const row of result.rows as Record<string, unknown>[]) {
+	for (const row of rows as Record<string, unknown>[]) {
 		const id = row.student_id as string;
 		if (!byStudent.has(id)) {
 			byStudent.set(id, {

@@ -3,21 +3,15 @@ import cors from "cors";
 import express from "express";
 import helmet from "helmet";
 import { pinoHttp } from "pino-http";
-import { attendanceRouter } from "@/contexts/attendance/infrastructure/routes/attendance.routes.js";
-import { registerTeacherSchema } from "@/contexts/identity/domain/register-teacher.schema.js";
+import { attendanceRouter } from "@/contexts/attendance/infrastructure/http/attendance.routes.js";
 import { auth } from "@/contexts/identity/infrastructure/auth/auth.config.js";
-import { meRouter } from "@/contexts/identity/infrastructure/routes/me.routes.js";
-import { registerTeacherHandler } from "@/contexts/identity/infrastructure/routes/register-teacher.route.js";
+import { teacherRouter } from "@/contexts/identity/infrastructure/http/teacher.routes.js";
 import { env } from "@/shared/config/env.js";
 import { logger } from "@/shared/logger/logger.js";
 import { errorHandlerMiddleware } from "@/shared/middleware/error-handler.middleware.js";
 import { notFoundMiddleware } from "@/shared/middleware/not-found.middleware.js";
-import { validate } from "@/shared/middleware/validate.middleware.js";
-import { academicRouter } from "./contexts/academic/infrastructure/routes/academic.routes.js";
-import {
-	generalRateLimit,
-	registrationRateLimit,
-} from "./shared/middleware/rate-limit.middleware.js";
+import { academicRouter } from "./contexts/academic/infrastructure/http/academic.routes.js";
+import { generalRateLimit } from "./shared/middleware/rate-limit.middleware.js";
 
 const app = express();
 
@@ -34,13 +28,7 @@ app.get("/health", (_req, res) => {
 	res.json({ status: "ok" });
 });
 
-app.post(
-	"/teachers/register",
-	registrationRateLimit,
-	validate(registerTeacherSchema),
-	registerTeacherHandler,
-);
-app.use("/teachers", meRouter);
+app.use("/teachers", teacherRouter);
 app.use(academicRouter);
 app.use(attendanceRouter);
 
