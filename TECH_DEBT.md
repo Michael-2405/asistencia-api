@@ -32,8 +32,4 @@ Sin cambios desde la revisión anterior: `event_type` sin lógica de `COMPLETIVE
 
 ## 🔵 Infraestructura / operación
 
-Sin cambios desde la revisión anterior: Resend en modo sandbox, sin tests, CI sin Postgres, sin observabilidad, Terraform solo gestiona GitHub, sin imagen Docker de la API, credenciales de desarrollo local.
-
-## 🧹 Limpieza pendiente
-
-- Bloque de código comentado en `server.ts` (rutas del spike original en español) — confirmar si sigue ahí y borrarlo. **Nota de esta revisión**: dado que `server.ts` ya demostró ser un archivo frágil ante reescrituras completas (ver gotcha 12 en `CONTEXT.md`), cualquier limpieza futura de este archivo debe hacerse por diffs quirúrgicos, revisando con cuidado que ningún router montado se pierda en el proceso.
+Sin cambios desde la revisión anterior: Resend en modo sandbox, sin observabilidad, Terraform solo gestiona GitHub, sin imagen Docker de la API, credenciales de desarrollo local.

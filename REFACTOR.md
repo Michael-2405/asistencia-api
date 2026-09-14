@@ -500,9 +500,9 @@ Dominio DNS (app. / api. / mail.)
 
 ## 12. Hoja de ruta sugerida del refactor
 
-1. Estructura: introducir Repository + Controller en `academic` primero (tiene el caso más claro de mezcla de responsabilidades), luego replicar en `identity` y `attendance`.
-2. Dominio y DNS: comprar dominio, crear subdominios, apuntar a frontend/API.
-3. Resend: verificar `mail.`, DMARC; conectar Better Auth; migrar plantillas a React Email.
+1. ✅ Estructura: introducir Repository + Controller en `academic` primero (tiene el caso más claro de mezcla de responsabilidades), luego replicar en `identity` y `attendance`.
+2. ✅ Dominio y DNS: comprar dominio, crear subdominios, apuntar a frontend/API.
+3. 🔄 Resend: verificar `mail.`, DMARC; conectar Better Auth; migrar plantillas a React Email.
 4. Health (`/ready`) + Sentry en API; Sentry en React.
 5. Versionado `0.1.0` y release en Sentry.
 6. Despliegue frontend + API + DB en las plataformas elegidas; staging opcional.
