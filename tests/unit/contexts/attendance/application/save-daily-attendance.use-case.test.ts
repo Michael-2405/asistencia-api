@@ -29,7 +29,9 @@ describe("saveDailyAttendance", () => {
 		vi.mocked(attendanceRecordsRepository.insertMany).mockReset();
 		vi.mocked(assertCourseOwnership).mockReset();
 		vi.mocked(assertCourseOwnership).mockResolvedValue({ id: "course-1" } as never);
-		vi.mocked(attendanceRecordsRepository.findStudentsEligibility).mockResolvedValue([]);
+		vi.mocked(attendanceRecordsRepository.findStudentsEligibility).mockResolvedValue([
+			{ id: "student-1", active: true, withdrawalDate: null },
+		] as never);
 		vi.mocked(attendanceRecordsRepository.findExistingForCourseAndDate).mockResolvedValue([]);
 	});
 
@@ -37,6 +39,15 @@ describe("saveDailyAttendance", () => {
 		await expect(
 			saveDailyAttendance("user-1", "course-1", { ...input, date: "2020-01-01" }),
 		).rejects.toThrow(ValidationError);
+	});
+
+	it("lanza ValidationError si un studentId no pertenece en absoluto al roster del curso", async () => {
+		// Distinto del caso "pertenece pero está retirado": aquí el estudiante ni siquiera aparece
+		// en la consulta de elegibilidad del curso (porque pertenece a otro curso, propio o ajeno).
+		vi.mocked(attendanceRecordsRepository.findStudentsEligibility).mockResolvedValue([]);
+
+		await expect(saveDailyAttendance("user-1", "course-1", input)).rejects.toThrow(ValidationError);
+		expect(attendanceRecordsRepository.insertMany).not.toHaveBeenCalled();
 	});
 
 	it("lanza ValidationError si hay un estudiante retirado inelegible", async () => {

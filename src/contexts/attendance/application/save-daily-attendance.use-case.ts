@@ -25,9 +25,14 @@ export async function saveDailyAttendance(
 		studentIds,
 	);
 
+	const foundIds = new Set(studentRows.map((s) => s.id));
+	const unknownIds = studentIds.filter((id) => !foundIds.has(id));
+	if (unknownIds.length > 0) {
+		throw new ValidationError("Uno o más estudiantes no pertenecen a este curso");
+	}
+
 	const withdrawnIneligible = studentRows.filter((s) => {
 		if (s.active) return false;
-		// Retirado, pero con fecha de retiro futura respecto al día que se registra: aún elegible.
 		return !s.withdrawalDate || s.withdrawalDate <= input.date;
 	});
 
