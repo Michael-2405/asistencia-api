@@ -7,6 +7,8 @@
 - **Bug real corregido**: `meRouter` montado sin prefijo de path interceptaba `401` en rutas completamente ajenas (`/subjects`, etc.) — ahora montado como `app.use("/teachers", meRouter)`.
 - **Bug real corregido**: `attendanceRouter` dejó de montarse en `server.ts` durante una reescritura completa del archivo — todas las rutas de asistencia devolvían `404`. Vuelto a montar, y documentado como lección de proceso (ver `CONTEXT.md`, gotcha 12).
 - **Endpoint nuevo**: `GET /courses/attendance-status` — agregado para alimentar el Dashboard del frontend, sin necesidad de N requests por curso.
+- **Refactor de capas** (Controller + Repository) completado en `identity`/`academic`/`attendance`.
+- **Bug real corregido, encontrado escribiendo tests**: `isPgUniqueViolation` (duplicado en 8 use-cases: `create-course`, `update-course`, `create-school-year`, `clone-courses`, `add-student`, `mark-course-non-instructional-day`, `save-daily-attendance`, `register-teacher`) chequeaba `error.code === "23505"` directo sobre el error, pero la versión instalada de `drizzle-orm` envuelve el error real de `pg` en `DrizzleQueryError.cause` — el chequeo nunca coincidía, y **toda violación real de unicidad devolvía 500 en vez del 409/`ConflictError` esperado**. Corregido en los 8 lugares para revisar también `error.cause`. Verificado con un test e2e real contra Postgres (no se detecta con mocks, que fabrican la forma del error).
 
 ## 🔴 Funcionalidad crítica pendiente
 
@@ -19,6 +21,8 @@ Sin cambios desde la revisión anterior: `POST /school-years` sin control de rol
 ## 🟡 Simplificaciones de dominio conocidas
 
 Sin cambios desde la revisión anterior: `event_type` sin lógica de `COMPLETIVE`/`EXTRAORDINARY`, día ADP simplificado, sin FK entre `teacher_profiles.subjectId` y `academic.subjects`, `updateCourse`/`updateStudent` como reemplazo completo, `withdrawStudent` siempre con fecha de hoy, sistema de alertas y resumen anual sin backend.
+
+- **Nuevo, encontrado escribiendo tests e2e**: la constraint `courses_user_year_grade_section_subject_uidx` (`userId, schoolYearId, grade, section, subjectId`) no protege cursos de encargado (`isHomeroom: true`, `subjectId` siempre `null`) — Postgres trata `NULL` como distinto de `NULL` en índices únicos por defecto, así que un docente puede crear el mismo curso de encargado (mismo grado/sección) dos veces sin que salte `ConflictError`. No corregido — requiere decidir si se agrega `NULLS NOT DISTINCT` al índice (Postgres 15+) o una columna sentinel en vez de `null`, que es una decisión de modelado, no un fix mecánico como el de `isPgUniqueViolation` arriba.
 
 ## 🟣 Deuda de arquitectura (introducida por el refactor de capas)
 

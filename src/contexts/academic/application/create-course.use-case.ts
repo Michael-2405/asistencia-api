@@ -32,5 +32,8 @@ export async function createCourse(userId: string, input: CreateCourseInput) {
 }
 
 function isPgUniqueViolation(error: unknown): boolean {
-	return typeof error === "object" && error !== null && "code" in error && error.code === "23505";
+	const pgError = error instanceof Error && error.cause ? error.cause : error;
+	return (
+		typeof pgError === "object" && pgError !== null && "code" in pgError && pgError.code === "23505"
+	);
 }
