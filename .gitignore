@@ -46,3 +46,4 @@ temp/
 .biome/
 
 gitleaks-report.json
+.claude/settings.local.json

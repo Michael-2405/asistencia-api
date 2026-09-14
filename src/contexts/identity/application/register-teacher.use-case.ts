@@ -1,4 +1,5 @@
 import { eq } from "drizzle-orm";
+import { assertSubjectMatchesLevel } from "@/contexts/academic/application/assert-subject-matches-level.js";
 import { auth } from "@/contexts/identity/infrastructure/auth/auth.config.js";
 import { user } from "@/contexts/identity/infrastructure/db/auth.schema.js";
 import { teacherProfiles } from "@/contexts/identity/infrastructure/db/schema.js";
@@ -15,6 +16,10 @@ export async function registerTeacher(input: RegisterTeacherInput) {
 
 	if (existingUser) {
 		throw new ConflictError("Ya existe una cuenta registrada con ese correo");
+	}
+
+	if (input.subjectId) {
+		await assertSubjectMatchesLevel(input.subjectId, input.educationLevel);
 	}
 
 	const signUpResult = await auth.api.signUpEmail({

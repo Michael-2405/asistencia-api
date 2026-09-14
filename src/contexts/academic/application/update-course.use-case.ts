@@ -4,9 +4,14 @@ import { ConflictError } from "../../../shared/errors/app-error.js";
 import type { CreateCourseInput } from "../domain/create-course.schema.js";
 import { courses } from "../infrastructure/db/schema.js";
 import { assertCourseOwnership } from "../utils/assert-course-ownership.js";
+import { assertSubjectMatchesLevel } from "./assert-subject-matches-level.js";
 
 export async function updateCourse(userId: string, courseId: string, input: CreateCourseInput) {
 	await assertCourseOwnership(courseId, userId);
+
+	if (input.subjectId) {
+		await assertSubjectMatchesLevel(input.subjectId, input.educationLevel);
+	}
 
 	try {
 		const [updated] = await db

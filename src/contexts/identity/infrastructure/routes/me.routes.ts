@@ -9,6 +9,7 @@ import { reactivateAccount } from "../../application/reactivate-account.use-case
 import { suspendAccount } from "../../application/suspend-account.use-case.js";
 
 const suspendSchema = z.object({ password: z.string().min(1) });
+const reactivateSchema = z.object({ password: z.string().min(1) });
 
 export const meRouter = Router();
 
@@ -24,7 +25,7 @@ meRouter.post("/me/suspend", validate(suspendSchema), async (req: Request, res: 
 	respondSuccess(res, result);
 });
 
-meRouter.post("/me/reactivate", async (req, res) => {
-	const result = await reactivateAccount(req.userId);
+meRouter.post("/me/reactivate", validate(reactivateSchema), async (req, res) => {
+	const result = await reactivateAccount(req.userId, req.body.password, req.headers);
 	respondSuccess(res, result);
 });

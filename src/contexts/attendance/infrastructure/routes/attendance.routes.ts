@@ -4,6 +4,7 @@ import { respondSuccess } from "@/shared/http/respond.js";
 import { checkNotSuspended } from "@/shared/middleware/check-not-suspended.middleware.js";
 import { requireAuth } from "@/shared/middleware/require-auth.middleware.js";
 import { validate } from "@/shared/middleware/validate.middleware.js";
+import { getAnnualAttendanceSummary } from "../../application/get-annual-attendance-summary.use-case.js";
 import { getMonthlyAttendance } from "../../application/get-monthly-attendance.use-case.js";
 import { getTodayAttendanceStatus } from "../../application/get-today-attendance-status.use-case.js";
 import { markCourseNonInstructionalDay } from "../../application/mark-course-non-instructional-day.use-case.js";
@@ -15,6 +16,14 @@ export const attendanceRouter = Router();
 
 attendanceRouter.use(requireAuth);
 attendanceRouter.use(checkNotSuspended);
+
+attendanceRouter.get(
+	"/courses/:courseId/attendance/annual-summary",
+	async (req: Request<{ courseId: string }>, res: Response) => {
+		const result = await getAnnualAttendanceSummary(req.userId, req.params.courseId);
+		respondSuccess(res, result);
+	},
+);
 
 attendanceRouter.get(
 	"/courses/:courseId/attendance",
